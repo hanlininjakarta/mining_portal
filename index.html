@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M&M Global Data Portal · Mining Investment Attractiveness</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+
+:root{
+  --navy:#0b2545;
+  --blue:#1a6fc4;
+  --blue2:#3d9be9;
+  --blue3:#7ec8f5;
+  --bg:#f5f8fc;
+  --white:#fff;
+  --rule:#cfdce8;
+  --rule2:#e4edf5;
+  --text:#1a2733;
+  --mid:#455a6a;
+  --muted:#7a92a4;
+  --miss:#b0bec5;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.5;overflow-x:hidden;}
+
+/* ── DATA360-STYLE HEADER ── */
+.wb-topbar{
+  background:#1a5276;
+  height:40px;display:flex;align-items:center;padding:0 32px;gap:16px;
+}
+.wb-topbar img{height:22px;opacity:.9;}
+.wb-topbar-sep{width:1px;height:18px;background:rgba(255,255,255,.25);}
+.wb-topbar-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:.2px;}
+.wb-topbar-sub{font-size:12px;color:rgba(255,255,255,.5);margin-left:4px;}
+
+.header{
+  background:var(--navy);
+  height:54px;display:flex;align-items:center;
+  padding:0 32px;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.hnav{display:flex;gap:0;}
+.hnav a{
+  padding:0 18px;height:54px;display:flex;align-items:center;
+  font-size:13.5px;font-weight:500;color:rgba(255,255,255,.65);
+  text-decoration:none;letter-spacing:.1px;
+  border-bottom:3px solid transparent;
+  transition:color .15s,border-color .15s;
+}
+.hnav a:hover{color:#fff;}
+.hnav a.on{color:#fff;border-bottom-color:var(--blue2);}
+
+/* ── HERO ── */
+.hero{
+  background:#050f1c;
+  min-height:580px;
+  display:grid;grid-template-columns:1fr 1fr;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(1px 1px at 12% 18%,rgba(255,255,255,.55) 0%,transparent 100%),
+    radial-gradient(1px 1px at 48% 8%, rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 72%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 28% 60%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 88% 55%,rgba(255,255,255,.45) 0%,transparent 100%),
+    radial-gradient(1px 1px at 62% 78%,rgba(255,255,255,.3) 0%,transparent 100%);
+}
+.hero-left{
+  padding:64px 56px 56px;display:flex;flex-direction:column;
+  justify-content:center;position:relative;z-index:2;
+}
+.hero-kicker{
+  font-size:11.5px;font-weight:700;letter-spacing:1.8px;
+  text-transform:uppercase;color:var(--blue3);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.hero-kicker::before{content:'';width:20px;height:1.5px;background:var(--blue3);}
+.hero h1{
+  font-family:'Source Serif 4',serif;
+  font-size:52px;font-weight:300;line-height:1.14;color:#fff;
+  margin-bottom:20px;letter-spacing:-.5px;
+}
+.hero h1 strong{font-weight:600;}
+.hero-desc{font-size:16px;color:rgba(255,255,255,.52);line-height:1.7;max-width:430px;font-weight:300;}
+.hero-stats{
+  display:flex;gap:40px;margin-top:40px;
+  padding-top:28px;border-top:1px solid rgba(255,255,255,.1);
+}
+.hs-n{font-family:'Source Serif 4',serif;font-size:36px;font-weight:600;color:var(--blue3);line-height:1;}
+.hs-l{font-size:12px;color:rgba(255,255,255,.38);margin-top:5px;}
+
+.hero-right{
+  position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+#globeSvg{width:100%;height:100%;min-height:580px;display:block;}
+.globe-glow{
+  position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(26,111,196,.15) 0%,transparent 70%);
+  pointer-events:none;left:50%;top:50%;transform:translate(-50%,-50%);
+}
+.clist-row{
+  position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;flex-wrap:nowrap;z-index:10;
+}
+.clist-btn{
+  padding:5px 14px;font-size:12px;font-weight:500;
+  border-radius:20px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.07);color:rgba(255,255,255,.72);
+  cursor:pointer;transition:all .18s;font-family:'Source Sans 3',sans-serif;
+  backdrop-filter:blur(6px);
+}
+.clist-btn:hover{background:rgba(255,255,255,.18);color:#fff;}
+.clist-btn.on{background:rgba(255,255,255,.95);color:var(--navy);font-weight:700;}
+.globe-hint{position:absolute;top:18px;right:20px;font-size:11px;color:rgba(255,255,255,.22);}
+
+/* Globe tooltip */
+.gtt{position:fixed;background:rgba(5,15,28,.95);color:#fff;padding:8px 12px;font-size:13px;
+     pointer-events:none;z-index:9999;display:none;border-left:2px solid var(--blue2);white-space:nowrap;}
+.gtt-n{font-weight:600;}
+.gtt-s{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;}
+
+/* ── CONTENT ── */
+.content{padding:52px 40px 80px;width:100%;}
+
+.sh{margin-bottom:28px;padding-bottom:14px;border-bottom:2px solid var(--blue);}
+.sk{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--blue);margin-bottom:6px;}
+.st{font-family:'Source Serif 4',serif;font-size:32px;font-weight:300;color:var(--navy);}
+.st strong{font-weight:600;}
+
+/* ── VIZ ROW: 50/50 ── */
+.viz-row{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:0;align-items:start;margin-bottom:48px;
+  border:1px solid var(--rule);background:#fff;
+}
+.left-half{border-right:1px solid var(--rule);background:#fff;min-width:0;overflow:visible;}
+.radial-col{padding:16px 10px 12px;min-width:0;overflow:visible;}
+.table-col{min-width:0;background:#fff;}
+
+/* Card headers */
+.pbh{
+  padding:14px 20px;border-bottom:1px solid var(--rule2);
+  display:flex;align-items:baseline;justify-content:space-between;
+  background:var(--bg);
+}
+.pbt{font-family:'Source Serif 4',serif;font-size:17px;font-weight:600;color:var(--navy);}
+.pbtag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+       color:var(--blue);border:1px solid #c5d9f0;padding:3px 9px;background:#fff;}
+.pbb{padding:20px 20px;}
+
+#rsvg{width:100%;height:auto;display:block;overflow:visible;}
+
+/* Table */
+.tabrow{display:flex;border-bottom:2px solid var(--rule2);margin-bottom:16px;overflow-x:auto;}
+.tab{padding:9px 13px;font-size:13px;font-weight:400;color:var(--muted);border:none;
+     background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;
+     margin-bottom:-2px;transition:all .15s;}
+.tab:hover{color:var(--navy);}
+.tab.on{color:var(--blue);font-weight:600;border-bottom-color:var(--blue);}
+
+.skey{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--muted);
+      margin-bottom:12px;flex-wrap:wrap;}
+.kg{display:flex;align-items:center;gap:4px;}
+.kd{width:10px;height:10px;border-radius:50%;}
+
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+thead tr{border-bottom:2px solid var(--blue);}
+th{padding:9px 10px;font-size:11px;font-weight:700;letter-spacing:.7px;
+   text-transform:uppercase;color:var(--blue);text-align:left;white-space:normal;
+   min-width:80px;max-width:130px;line-height:1.35;vertical-align:bottom;}
+th:first-child{min-width:110px;max-width:110px;}
+tbody tr{border-bottom:1px solid var(--rule2);cursor:pointer;transition:background .1s;}
+tbody tr:hover{background:#eef5ff;}
+tbody tr.hi{background:#e6f0fc;}
+td{padding:10px 10px;vertical-align:middle;}
+.cn{font-size:14px;font-weight:600;color:var(--blue);}
+.dots{display:flex;gap:4px;}
+.d{width:11px;height:11px;border-radius:50%;transition:transform .1s;}
+tbody tr:hover .d{transform:scale(1.1);}
+.sv{font-size:15px;font-weight:700;}
+.ibar{margin-top:12px;padding:11px 16px;border-left:3px solid var(--blue2);
+      background:#eef5ff;font-size:13px;color:var(--mid);display:none;line-height:1.6;}
+.ibar.on{display:block;}
+
+/* ── BOTTOM STRIP ── */
+.bottom-strip{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border:1px solid var(--rule);margin-top:8px;
+}
+.bs-item{padding:28px 32px;border-right:1px solid var(--rule);background:#fff;}
+.bs-item:last-child{border-right:none;}
+.bs-num{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.bs-title{font-family:'Source Serif 4',serif;font-size:19px;font-weight:600;color:var(--navy);margin-bottom:8px;}
+.bs-desc{font-size:13.5px;color:var(--mid);line-height:1.65;font-weight:300;}
+.bs-badge{display:inline-block;margin-top:14px;font-size:10.5px;font-weight:700;
+          letter-spacing:.8px;text-transform:uppercase;padding:4px 10px;
+          border:1px solid var(--rule);color:var(--muted);background:var(--bg);}
+.bs-badge.live{border-color:var(--blue);color:var(--blue);background:#eef4ff;}
+
+/* ── TOOLTIP ── */
+.tt{position:fixed;background:var(--navy);color:#fff;padding:12px 16px;font-size:13px;
+    pointer-events:none;z-index:999;display:none;max-width:260px;
+    border-left:3px solid var(--blue2);box-shadow:0 4px 24px rgba(0,0,0,.2);}
+.ttn{font-weight:700;font-size:14px;margin-bottom:4px;}
+.tts{font-size:17px;font-weight:700;color:var(--blue2);margin-bottom:3px;}
+.ttd{font-size:11.5px;color:rgba(255,255,255,.5);line-height:1.4;}
+.ttc{font-size:10.5px;color:rgba(255,255,255,.25);margin-top:5px;}
+
+/* ── SIDE PANEL ── */
+.ov{position:fixed;inset:0;background:rgba(5,15,28,.38);z-index:200;display:none;}
+.ov.on{display:block;}
+.sp{position:fixed;top:0;right:-460px;width:440px;height:100vh;background:#fff;z-index:300;
+    transition:right .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;border-left:1px solid var(--rule);}
+.sp.on{right:0;}
+.sph{padding:26px 26px 22px;border-bottom:1px solid var(--rule);background:#eef5ff;}
+.spcl{float:right;background:none;border:none;cursor:pointer;font-size:19px;color:var(--muted);}
+.spcl:hover{color:var(--navy);}
+.spk{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+.sptt{font-family:'Source Serif 4',serif;font-size:22px;font-weight:600;color:var(--navy);line-height:1.25;}
+.spb{padding:24px 26px;}
+.sco{text-align:center;padding:24px 16px;border:1px solid var(--rule);margin-bottom:22px;background:var(--bg);}
+.scn{font-family:'Source Serif 4',serif;font-size:64px;font-weight:600;line-height:1;}
+.scl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+.subh{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:13px;}
+.subrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule2);}
+.subrow:last-child{border-bottom:none;}
+.subn{font-size:13px;color:var(--mid);flex:1;font-weight:300;}
+.bbg{width:90px;height:5px;background:var(--rule2);}
+.bfill{height:100%;transition:width .65s cubic-bezier(.4,0,.2,1);}
+.subv{font-size:13px;font-weight:600;width:28px;text-align:right;color:var(--text);}
+.rsn{margin-top:18px;padding:14px 16px;background:#eef5ff;border-left:3px solid var(--blue2);}
+.rsn p{font-size:13px;color:var(--mid);line-height:1.65;font-style:italic;}
+.rsn strong{color:var(--navy);font-style:normal;}
+
+.footer{background:var(--navy);color:rgba(255,255,255,.38);text-align:center;padding:22px;font-size:12.5px;}
+.footer strong{color:rgba(255,255,255,.65);}
+</style>
+</head>
+<body>
+
+<!-- DATA360-STYLE WB TOPBAR -->
+<div class="wb-topbar">
+  <svg height="22" viewBox="0 0 220 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="20" r="18" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" fill="none"/>
+    <ellipse cx="20" cy="20" rx="8" ry="18" stroke="rgba(255,255,255,0.8)" stroke-width="1" fill="none"/>
+    <line x1="2" y1="20" x2="38" y2="20" stroke="rgba(255,255,255,0.8)" stroke-width="1"/>
+    <line x1="20" y1="2" x2="20" y2="38" stroke="rgba(255,255,255,0.8)" stroke-width="1"/>
+    <text x="48" y="26" fill="rgba(255,255,255,0.9)" font-family="sans-serif" font-size="14" font-weight="700" letter-spacing="0.5">WORLD BANK GROUP</text>
+  </svg>
+  <div class="wb-topbar-sep"></div>
+  <span class="wb-topbar-name">M&amp;M Global Data Portal</span>
+  <span class="wb-topbar-sub">Mining Investment Attractiveness</span>
+</div>
+
+<!-- MAIN NAV -->
+<header class="header">
+  <nav class="hnav">
+    <a href="#" class="on">Country Profiles</a>
+    <a href="#">Compare</a>
+    <a href="#">Data Explorer</a>
+    <a href="#">Methodology</a>
+    <a href="#">About</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-kicker">RISE Initiative &nbsp;·&nbsp; Responsible &amp; Inclusive Supply Chain Enhancement</div>
+    <h1>Mining Investment<br><strong>Attractiveness Portal</strong></h1>
+    <p class="hero-desc">A multidimensional diagnostic of mining-sector readiness based on the World Bank Mining Sector Diagnostic. Country profiles present investment conditions across ten indicator clusters.</p>
+    <div class="hero-stats">
+      <div><div class="hs-n">10</div><div class="hs-l">Indicator clusters</div></div>
+      <div><div class="hs-n">30</div><div class="hs-l">Sub-indicators</div></div>
+      <div><div class="hs-n">6</div><div class="hs-l">Countries (demo)</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="globe-glow"></div>
+    <svg id="globeSvg"></svg>
+    <div class="globe-hint">Drag to rotate · Click a country</div>
+    <div class="clist-row" id="clist"></div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="mainContent">
+  <div class="sh">
+    <div class="sk">Component 1 · Country Snapshot</div>
+    <div class="st"><strong id="cname">Ghana</strong> — Mining Sector Profile</div>
+  </div>
+
+  <div class="viz-row">
+    <!-- LEFT: radial -->
+    <div class="left-half">
+      <div class="radial-col">
+        <div class="pbh" style="margin:-16px -10px 12px;border-bottom:1px solid var(--rule2);">
+          <div class="pbt">Indicator Snapshot</div><div class="pbtag">Radial · 30 sub-indicators</div>
+        </div>
+        <!-- viewBox: centre 280,280 in 560x560, with 100px margin all sides for labels -->
+        <svg id="rsvg" viewBox="-100 -100 760 760" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;overflow:visible;"></svg>
+      </div>
+    </div>
+
+    <!-- RIGHT: table -->
+    <div class="table-col">
+      <div class="pbh"><div class="pbt">Country Indicator Table</div><div class="pbtag">Dot scoring</div></div>
+      <div class="pbb">
+        <div class="tabrow" id="tabs"></div>
+        <div class="skey">
+          <span>Key:</span>
+          <div class="kg">
+            <div class="kd" style="background:#1a6fc4;opacity:1"></div>
+            <div class="kd" style="background:#1a6fc4;opacity:1"></div>
+            <div class="kd" style="background:#1a6fc4;opacity:1"></div>
+            <div class="kd" style="background:#1a6fc4;opacity:.18"></div>
+            <div class="kd" style="background:#1a6fc4;opacity:.18"></div>
+            <span>Partial</span>
+          </div>
+          <div class="kg">
+            <div class="kd" style="background:var(--miss)"></div>
+            <div class="kd" style="background:var(--miss)"></div>
+            <div class="kd" style="background:var(--miss)"></div>
+            <div class="kd" style="background:var(--miss)"></div>
+            <div class="kd" style="background:var(--miss)"></div>
+            <span>Not available</span>
+          </div>
+        </div>
+        <div class="tw"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+        <div class="ibar" id="ibar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM 3-COL -->
+  <div class="bottom-strip">
+    <div class="bs-item">
+      <div class="bs-num">Component 1</div>
+      <div class="bs-title">Global Data Repository</div>
+      <div class="bs-desc">Country-level MSD scoring across 9 bundles with interactive radial profiles and tabular views.</div>
+      <span class="bs-badge live">&#x2713; Live Demo</span>
+    </div>
+    <div class="bs-item">
+      <div class="bs-num">Component 2</div>
+      <div class="bs-title">Knowledge Products</div>
+      <div class="bs-desc">Country reports, policy briefs, and diagnostic summaries from MSD and supplementary sources.</div>
+      <span class="bs-badge">Coming soon</span>
+    </div>
+    <div class="bs-item">
+      <div class="bs-num">Component 3</div>
+      <div class="bs-title">Metals &amp; Minerals Academy</div>
+      <div class="bs-desc">Capacity-building modules for government officials, investors, and sector stakeholders.</div>
+      <span class="bs-badge">Coming soon</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <strong>M&amp;M Global Data Portal</strong> &nbsp;·&nbsp; World Bank Group &nbsp;·&nbsp; EGPS / RISE Initiative &nbsp;·&nbsp; Illustrative data only
+</div>
+
+<div class="tt" id="tt"><div class="ttn" id="ttn"></div><div class="tts" id="tts"></div><div class="ttd" id="ttd"></div><div class="ttc">Click for details</div></div>
+<div class="gtt" id="gtt"><div class="gtt-n" id="gttn"></div><div class="gtt-s" id="gtts"></div></div>
+<div class="ov" id="ov" onclick="closeSP()"></div>
+<div class="sp" id="sp">
+  <div class="sph">
+    <button class="spcl" onclick="closeSP()">&#x2715;</button>
+    <div class="spk" id="spk"></div>
+    <div class="sptt" id="sptt"></div>
+  </div>
+  <div class="spb">
+    <div class="sco"><div class="scn" id="scn"></div><div class="scl">Cluster Score · Out of 100</div></div>
+    <div class="subh">Sub-indicators</div>
+    <div id="subs"></div>
+    <div class="rsn" id="rsn"></div>
+  </div>
+</div>
+
+<script>
+/* ── DATA ── */
+const CGEO={Ghana:{lat:7.9,lon:-1.0},Peru:{lat:-9.2,lon:-75.0},Zambia:{lat:-13.1,lon:27.8},Mongolia:{lat:46.8,lon:103.8},Indonesia:{lat:-2.5,lon:118.0},DRC:{lat:-4.0,lon:21.8}};
+const CIDS={288:'Ghana',604:'Peru',894:'Zambia',496:'Mongolia',360:'Indonesia',180:'DRC'};
+const CLABELS={Ghana:'Ghana',Peru:'Peru',Zambia:'Zambia',Mongolia:'Mongolia',Indonesia:'Indonesia',DRC:'DR Congo'};
+
+const B=[
+  {id:'pol',label:'Political Stability &\nGovernance Quality',
+   short:'Political Stability & Governance Quality', hex:'#1a6fc4',
+   desc:'Country-level governance quality drawn from WB Worldwide Governance Indicators (WGI) — political stability, accountability, and rule of law.',
+   reason:'Macro-political conditions determine the risk premium on investment and the predictability of the operating environment.',
+   subs:['Political Stability & Accountability','State Effectiveness & Regulatory Quality','Rule of Law & Anti-Corruption']},
+  {id:'geo',label:'Geological Information &\nResource Tenure',
+   short:'Geological Information & Resource Tenure', hex:'#0097a7',
+   desc:'Availability and quality of geological data, mining cadastre management, and reporting obligations for license holders.',
+   reason:'Reliable geological data and clear tenure are prerequisites for any mining investment decision.',
+   subs:['Geological Survey & Data Availability','Mining Cadastre & Spatial Registry','Data Reporting & Disclosure Obligations']},
+  {id:'reg',label:'Mining Regulatory\nFramework',
+   short:'Mining Regulatory Framework', hex:'#7b1fa2',
+   desc:'The de jure legal framework governing mining — licensing procedures, fiscal legislation, and coherence of the regulatory architecture.',
+   reason:'A comprehensive and stable legal framework reduces uncertainty and transaction costs for investors.',
+   subs:['License Award, Conditions & Penalties','Tax, Royalty & Fiscal Instruments','Legislative Coherence & Disclosure Requirements']},
+  {id:'ins',label:'Institutional Capacity &\nPublic Administration',
+   short:'Institutional Capacity & Public Administration', hex:'#e65100',
+   desc:'Whether government institutions have the mandate, staff, and systems to administer the mining sector effectively.',
+   reason:'Institutional capacity determines whether good laws translate into effective governance in practice.',
+   subs:['Mining Governance Architecture','Licensing & Compliance Administration','Revenue & Investment Administration']},
+  {id:'ops',label:'Operational Efficiency &\nService Quality',
+   short:'Operational Efficiency & Service Quality', hex:'#f57c00',
+   desc:'The de facto performance of government institutions — whether rules are followed and services delivered efficiently and with integrity.',
+   reason:'Regulatory performance in practice directly affects investor timelines and operating costs.',
+   subs:['Licensing Process Integrity & Performance','Tax & Fiscal Administration Performance','Revenue Transparency & Public Accountability']},
+  {id:'esg',label:'Mining ESG Standards\n& Practices',
+   short:'Mining ESG Standards & Practices', hex:'#2e7d32',
+   desc:'Environmental, social and governance standards and their practical implementation in the mining sector.',
+   reason:'ESG compliance is a prerequisite for international project finance and the social licence to operate.',
+   subs:['Environmental Standards & Compliance','Social Standards & Community Engagement','Revenue Governance & Accountability']},
+  {id:'trn',label:'Transport\n& Logistics',
+   short:'Transport & Logistics', hex:'#1565c0',
+   desc:'Logistics performance covering transport infrastructure quality, customs efficiency, and supply-chain reliability. Source: WB LPI 1.0.',
+   reason:'Infrastructure gaps and logistics inefficiency can render viable deposits commercially unviable.',
+   subs:['Transport Infrastructure & Logistics Quality','Customs Efficiency & International Shipment','Delivery Timeliness & Traceability']},
+  {id:'inf',label:'Infrastructure\n& Utilities',
+   short:'Infrastructure & Utilities', hex:'#bf360c',
+   desc:'Access, reliability and quality of utilities critical to mining operations — power, water, and digital connectivity. Source: WB B-Ready.',
+   reason:'Unreliable energy and water supply directly increase operating costs and project risk.',
+   subs:['Electricity','Water Supply','Digital Connectivity']},
+  {id:'biz',label:'Business Entry\n& Market Access',
+   short:'Business Entry & Market Access', hex:'#4527a0',
+   desc:'Conditions for establishing a mining business — foreign ownership restrictions, local content obligations, and registration burden. Source: WB B-Ready.',
+   reason:'Market entry barriers and local content obligations significantly affect investment attractiveness.',
+   subs:['Foreign Investment Entry Conditions','Local Content & Hiring Requirements','Business Registration & Digital Administration']},
+  {id:'lab',label:'Mining Labor &\nWorkforce Development',
+   short:'Mining Labor & Workforce Development', hex:'#6d4c41',
+   desc:'Labor environment for mining operations: safety standards, workforce skills, and employment conditions. Source: MSD + WB B-Ready.',
+   reason:'Skilled labor shortages and rigid labor frameworks increase operational costs and social risk.',
+   subs:['Occupational Safety & Health','Training & Employment Services','Labor Conditions, Costs & Social Protection']},
+];
+
+const SC={Ghana:[62,74,58,65,60,68,55,71,62,66],Peru:[65,83,56,59,55,62,68,64,74,63],Zambia:[54,67,50,56,44,60,40,null,55,57],Mongolia:[58,71,61,52,52,55,null,null,46,61],Indonesia:[61,76,62,70,58,66,62,75,68,69],DRC:[32,60,42,38,36,52,null,43,null,42]};
+const YR={Ghana:2024,Peru:2024,Zambia:2024,Mongolia:2023,Indonesia:2024,DRC:2024};
+const MISS={Zambia:[7],Mongolia:[6,7],DRC:[6,8]};
+const ALL=Object.keys(SC);
+
+let cc='Ghana',at=0,rAnim=false;
+const isM=(c,i)=>SC[c][i]===null||SC[c][i]===undefined||(MISS[c]||[]).includes(i);
+const gs=(c,i)=>isM(c,i)?null:SC[c][i];
+const sv=(s,j)=>s===null?[null,null,null]:[0,1,2].map(k=>Math.min(100,Math.max(8,s+(k===0?7:k===1?-9:3)+(j%3)*2)));
+
+/* ── GLOBE ── */
+let globeProj,autoRotating=true;
+let hlSel,dotSel,gratPath,cPaths;
+
+function initGlobe(){
+  const cont=document.querySelector('.hero-right');
+  const W=cont.offsetWidth||580,H=Math.max(580,cont.offsetHeight||580);
+  const R=Math.min(W,H)*0.43,cx=W/2,cy=H/2;
+  const svg=d3.select('#globeSvg').attr('viewBox',`0 0 ${W} ${H}`).attr('width',W).attr('height',H);
+  globeProj=d3.geoOrthographic().scale(R).translate([cx,cy]).clipAngle(90).rotate([15,-20,0]);
+  const path=d3.geoPath().projection(globeProj);
+  const defs=svg.append('defs');
+  const og=defs.append('radialGradient').attr('id','oG').attr('cx','38%').attr('cy','35%').attr('r','65%');
+  og.append('stop').attr('offset','0%').attr('stop-color','#1e4d8c');
+  og.append('stop').attr('offset','100%').attr('stop-color','#08182e');
+  const ag=defs.append('radialGradient').attr('id','atm').attr('cx','50%').attr('cy','50%').attr('r','50%');
+  ag.append('stop').attr('offset','85%').attr('stop-color','rgba(26,111,196,0)');
+  ag.append('stop').attr('offset','100%').attr('stop-color','rgba(74,159,245,0.18)');
+  svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R+5).attr('fill','url(#atm)');
+  svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R).attr('fill','url(#oG)').attr('stroke','rgba(74,159,245,0.25)').attr('stroke-width','1');
+  const g=svg.append('g');
+  const grat=d3.geoGraticule()();
+  gratPath=g.append('path').datum(grat).attr('fill','none').attr('stroke','rgba(100,160,220,0.1)').attr('stroke-width','0.5');
+
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json()).then(world=>{
+    const feats=topojson.feature(world,world.objects.countries).features;
+    cPaths=g.selectAll('.land').data(feats).enter().append('path').attr('class','land').attr('d',path)
+      .attr('fill','rgba(180,210,235,0.16)').attr('stroke','rgba(120,170,210,0.2)').attr('stroke-width','0.4');
+    const hlFeats=feats.filter(f=>CIDS[+f.id]);
+    hlSel=g.selectAll('.hl').data(hlFeats).enter().append('path').attr('class','hl').attr('d',path)
+      .attr('fill',f=>CIDS[+f.id]===cc?'rgba(180,220,255,0.72)':'rgba(100,180,240,0.4)')
+      .attr('stroke',f=>CIDS[+f.id]===cc?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.5)')
+      .attr('stroke-width',f=>CIDS[+f.id]===cc?2:1.1).style('cursor','pointer')
+      .on('mouseenter',(e,f)=>{const n=CIDS[+f.id];showGTT(e,CLABELS[n],'Click to view');d3.select(e.target).attr('fill','rgba(200,235,255,0.85)');})
+      .on('mousemove',e=>{d3.select('#gtt').style('left',(e.clientX+14)+'px').style('top',(e.clientY-10)+'px');})
+      .on('mouseleave',(e,f)=>{hideGTT();const n=CIDS[+f.id];d3.select(e.target).attr('fill',n===cc?'rgba(180,220,255,0.72)':'rgba(100,180,240,0.4)');})
+      .on('click',(e,f)=>selC(CIDS[+f.id]));
+    const dotData=Object.entries(CGEO).map(([k,v])=>({key:k,...v}));
+    dotSel=g.selectAll('.cdot').data(dotData).enter().append('circle').attr('class','cdot').attr('r',5)
+      .attr('fill',d=>d.key===cc?'#fff':'rgba(255,255,255,0.65)').attr('stroke','rgba(255,255,255,0.4)').attr('stroke-width',1.2)
+      .style('cursor','pointer')
+      .on('mouseenter',(e,d)=>showGTT(e,CLABELS[d.key],'Click to view'))
+      .on('mousemove',e=>{d3.select('#gtt').style('left',(e.clientX+14)+'px').style('top',(e.clientY-10)+'px');})
+      .on('mouseleave',hideGTT).on('click',(e,d)=>selC(d.key));
+    update();
+  }).catch(()=>{update();});
+
+  function isVis(lon,lat){const r=globeProj.rotate();return Math.cos((lat+r[1])*Math.PI/180)*Math.cos((lon+r[0])*Math.PI/180)>0;}
+  function update(){
+    gratPath.attr('d',d3.geoPath().projection(globeProj));
+    if(cPaths) cPaths.attr('d',d3.geoPath().projection(globeProj));
+    if(hlSel){
+      hlSel.attr('d',d3.geoPath().projection(globeProj))
+        .attr('fill',f=>CIDS[+f.id]===cc?'rgba(180,220,255,0.72)':'rgba(100,180,240,0.4)')
+        .attr('stroke',f=>CIDS[+f.id]===cc?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.5)')
+        .attr('stroke-width',f=>CIDS[+f.id]===cc?2:1.1);
+    }
+    if(dotSel){
+      dotSel.attr('cx',d=>{const p=globeProj([d.lon,d.lat]);return p?p[0]:null;})
+            .attr('cy',d=>{const p=globeProj([d.lon,d.lat]);return p?p[1]:null;})
+            .attr('r',d=>globeProj([d.lon,d.lat])&&isVis(d.lon,d.lat)?d.key===cc?7:5:0)
+            .attr('fill',d=>d.key===cc?'#fff':'rgba(255,255,255,0.65)').attr('stroke-width',d=>d.key===cc?2:1);
+    }
+  }
+  window._globeUpdate=update;
+  let lastT=null;
+  function autoRot(ts){if(autoRotating){if(lastT)globeProj.rotate([globeProj.rotate()[0]+(ts-lastT)*0.012,globeProj.rotate()[1]]);lastT=ts;update();}else{lastT=null;}requestAnimationFrame(autoRot);}
+  requestAnimationFrame(autoRot);
+  let drag0=null,rot0=null;
+  svg.on('mousedown',e=>{autoRotating=false;drag0={x:e.clientX,y:e.clientY};rot0=globeProj.rotate().slice();});
+  d3.select(window).on('mousemove.g',e=>{if(!drag0)return;const dx=e.clientX-drag0.x,dy=e.clientY-drag0.y;globeProj.rotate([rot0[0]+dx*0.3,rot0[1]-dy*0.3]);update();});
+  d3.select(window).on('mouseup.g',()=>{drag0=null;});
+  window.spinTo=function(lon,lat){
+    autoRotating=false;const r0=globeProj.rotate().slice();const t=[-lon,Math.max(-45,Math.min(30,-lat*0.5))];
+    let p=0;function s(){p=Math.min(p+0.04,1);const e=p<0.5?2*p*p:-1+(4-2*p)*p;globeProj.rotate([r0[0]+(t[0]-r0[0])*e,r0[1]+(t[1]-r0[1])*e]);update();if(p<1)requestAnimationFrame(s);}requestAnimationFrame(s);
+  };
+}
+
+function showGTT(e,n,s){document.getElementById('gttn').textContent=n;document.getElementById('gtts').textContent=s;d3.select('#gtt').style('display','block').style('left',(e.clientX+14)+'px').style('top',(e.clientY-10)+'px');}
+function hideGTT(){d3.select('#gtt').style('display','none');}
+
+function buildCList(){
+  const el=document.getElementById('clist');el.innerHTML='';
+  ALL.forEach(c=>{const b=document.createElement('button');b.className='clist-btn'+(c===cc?' on':'');b.textContent=CLABELS[c];b.addEventListener('click',()=>selC(c));el.appendChild(b);});
+}
+
+/* ── RADIAL: 27 petals with outer horizontal labels ── */
+function mk(tag,a){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e;}
+
+function shade(hex,pct){
+  const n=parseInt(hex.slice(1),16);
+  const r=Math.min(255,Math.max(0,Math.round((n>>16)*(1+pct))));
+  const g=Math.min(255,Math.max(0,Math.round(((n>>8)&0xff)*(1+pct))));
+  const b=Math.min(255,Math.max(0,Math.round((n&0xff)*(1+pct))));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+function drawR(c,an){
+  const svg=document.getElementById('rsvg'); svg.innerHTML='';
+  // Chart centre at 280,280 inside a 560x560 space;
+  // viewBox is "-80 -80 720 720" giving 80px margin on all sides for labels
+  const cx=280,cy=280,mn=62,mx=210,n=B.length;
+  const bundleGap=0.045,subGap=0.008,as=(2*Math.PI)/n;
+  const shades=[0.22,0,-0.22];
+
+  // Guide rings
+  [0.33,0.67,1].forEach(f=>{
+    svg.appendChild(mk('circle',{cx,cy,r:mn+(mx-mn)*f,fill:'none',stroke:'#dde8f4','stroke-width':'1','stroke-dasharray':f<1?'4,4':'none'}));
+  });
+  [{f:0.33,v:'33'},{f:0.67,v:'67'},{f:1,v:'100'}].forEach(({f,v})=>{
+    const t=mk('text',{x:cx+4,y:cy-(mn+(mx-mn)*f)+11,'text-anchor':'start',fill:'#b0c4d4','font-size':'10','font-family':'Source Sans 3,sans-serif'});
+    t.textContent=v; svg.appendChild(t);
+  });
+  B.forEach((_,i)=>{
+    const a=i*as-Math.PI/2;
+    svg.appendChild(mk('line',{x1:cx+mn*Math.cos(a),y1:cy+mn*Math.sin(a),x2:cx+(mx+8)*Math.cos(a),y2:cy+(mx+8)*Math.sin(a),stroke:'#c0d0e0','stroke-width':'1.3'}));
+  });
+
+  // Centre
+  svg.appendChild(mk('circle',{cx,cy,r:mn-1,fill:'#f5f9fd'}));
+  const ct=mk('text',{x:cx,y:cy-5,'text-anchor':'middle',fill:'#0b2545','font-size':'18','font-family':'Source Serif 4,serif','font-weight':'600'});
+  ct.textContent=CLABELS[c]; svg.appendChild(ct);
+  const ct2=mk('text',{x:cx,y:cy+13,'text-anchor':'middle',fill:'#7a92a4','font-size':'11','font-family':'Source Sans 3,sans-serif'});
+  ct2.textContent=YR[c]; svg.appendChild(ct2);
+
+  B.forEach((b,i)=>{
+    const bScore=gs(c,i),miss=isM(c,i);
+    const subs=sv(bScore,i);
+    const bStart=i*as-Math.PI/2+bundleGap,bEnd=(i+1)*as-Math.PI/2-bundleGap;
+    const bSpan=bEnd-bStart,subSpan=(bSpan-subGap*2)/3;
+    const midA=i*as-Math.PI/2+as/2;
+
+    // 3 sub-petals
+    subs.forEach((score,j)=>{
+      const sa=bStart+j*(subSpan+subGap),ea=sa+subSpan;
+      const r=score!==null?mn+(mx-mn)*(score/100):mn+11;
+      const fill=miss||score===null?'#b8cad4':shade(b.hex,shades[j]);
+      const op=miss||score===null?0.3:0.9;
+      const la=(ea-sa)>Math.PI?1:0;
+      const x1=cx+mn*Math.cos(sa),y1=cy+mn*Math.sin(sa),x2=cx+r*Math.cos(sa),y2=cy+r*Math.sin(sa);
+      const x3=cx+r*Math.cos(ea),y3=cy+r*Math.sin(ea),x4=cx+mn*Math.cos(ea),y4=cy+mn*Math.sin(ea);
+
+      const gg=document.createElementNS('http://www.w3.org/2000/svg','g');
+      gg.style.transformOrigin=`${cx}px ${cy}px`;
+      if(an){gg.style.transform='scale(0)';gg.style.opacity='0';gg.style.transition=`transform .46s cubic-bezier(.34,1.38,.64,1) ${(i*3+j)*.033}s,opacity .2s ease ${(i*3+j)*.033}s`;}
+      const p=mk('path',{d:`M${x1} ${y1}L${x2} ${y2}A${r} ${r} 0 ${la} 1 ${x3} ${y3}L${x4} ${y4}A${mn} ${mn} 0 ${la} 0 ${x1} ${y1}Z`,fill,opacity:op,cursor:'pointer'});
+      if(!miss&&score!==null){
+        const edge=mk('path',{d:`M${cx+r*Math.cos(sa+.003)} ${cy+r*Math.sin(sa+.003)}A${r} ${r} 0 ${la} 1 ${cx+r*Math.cos(ea-.003)} ${cy+r*Math.sin(ea-.003)}`,fill:'none',stroke:shade(b.hex,.35),'stroke-width':'2.5',opacity:'.6',cursor:'pointer'});
+        gg.appendChild(edge);
+      }
+      const subName=b.subs[j];
+      const hov=e=>{gg.querySelectorAll('path').forEach(x=>x.setAttribute('opacity','1'));document.getElementById('ttn').textContent=`${b.short} — ${subName}`;document.getElementById('tts').textContent=score!==null?score+' / 100':'Data not available';document.getElementById('ttd').textContent=b.desc;TT.style.display='block';movTT(e);};
+      const unh=()=>{gg.querySelectorAll('path').forEach((x,k)=>x.setAttribute('opacity',k===0?op:'.6'));hideTT();};
+      p.addEventListener('mouseenter',hov);p.addEventListener('mousemove',movTT);p.addEventListener('mouseleave',unh);p.addEventListener('click',()=>openP(b,bScore,c));
+      gg.appendChild(p);svg.appendChild(gg);
+      if(an) requestAnimationFrame(()=>requestAnimationFrame(()=>{gg.style.transform='scale(1)';gg.style.opacity=op+'';}));
+    });
+
+    // ── Outer label: always horizontal, guaranteed inside viewBox ──
+    // labelR must keep lx,ly well within viewBox "-100 -100 760 760"
+    // cx=280, mx=210, so mx+labelGap anchor point:
+    const labelR=mx+28; // tick end; label text starts further out
+    const lx=cx+labelR*Math.cos(midA);
+    const ly=cy+labelR*Math.sin(midA);
+
+    // Which quadrant? normDeg: 0=right, 90=bottom, 180=left, 270=top
+    const normDeg=((midA*180/Math.PI)%360+360)%360;
+
+    // text-anchor
+    let anchor='middle';
+    if(normDeg<55||normDeg>305) anchor='start';      // right side
+    else if(normDeg>125&&normDeg<235) anchor='end';   // left side
+
+    // Small tick line from disc edge outward
+    const t1x=cx+(mx+6)*Math.cos(midA),t1y=cy+(mx+6)*Math.sin(midA);
+    const t2x=cx+(mx+20)*Math.cos(midA),t2y=cy+(mx+20)*Math.sin(midA);
+    svg.appendChild(mk('line',{x1:t1x,y1:t1y,x2:t2x,y2:t2y,stroke:miss?'#b8cad4':b.hex,'stroke-width':'2.5',opacity:'.8'}));
+
+    // Label text — split on \n into max 2 lines
+    const lines=b.label.split('\n');
+    const fs=12.5,lh=16;
+
+    // Vertical positioning:
+    // top region (normDeg 200–340): text block sits ABOVE anchor → last line at ly
+    // bottom region (normDeg 20–160): text block sits BELOW anchor → first line at ly
+    // sides: vertically centred
+    const isTopRegion=normDeg>=200&&normDeg<=340;
+    const isBotRegion=normDeg>=20&&normDeg<=160;
+
+    let y0; // y of first line
+    if(isTopRegion)      y0=ly-(lines.length-1)*lh;
+    else if(isBotRegion) y0=ly+2;
+    else                 y0=ly-(lines.length-1)*lh/2; // centred vertically
+
+    const labelG=document.createElementNS('http://www.w3.org/2000/svg','g');
+    labelG.style.cursor='pointer';
+    labelG.addEventListener('click',()=>openP(b,bScore,c));
+
+    lines.forEach((line,li)=>{
+      const t=mk('text',{
+        x:lx, y:y0+li*lh,
+        'text-anchor':anchor,
+        'dominant-baseline':'auto',
+        fill:miss?'#8a9fae':b.hex,
+        'font-size':fs,
+        'font-family':'Source Sans 3,sans-serif',
+        'font-weight':'600'
+      });
+      t.textContent=line;
+      labelG.appendChild(t);
+    });
+    svg.appendChild(labelG);
+  });
+}
+
+/* ── TOOLTIP ── */
+const TT=document.getElementById('tt');
+function movTT(e){TT.style.left=(e.clientX+16)+'px';TT.style.top=(e.clientY-10)+'px';}
+function hideTT(){TT.style.display='none';}
+
+/* ── PANEL ── */
+function openP(b,sc,c){
+  document.getElementById('spk').textContent=CLABELS[c]+' · '+YR[c];
+  document.getElementById('sptt').textContent=b.short;
+  const sn=document.getElementById('scn');sn.textContent=sc!==null?sc:'N/A';sn.style.color=sc!==null?b.hex:'#b0bec5';
+  const sl=document.getElementById('subs');sl.innerHTML='';
+  sv(sc,B.indexOf(b)).forEach((v,j)=>{const r=document.createElement('div');r.className='subrow';r.innerHTML=`<div class="subn">${b.subs[j]}</div><div class="bbg"><div class="bfill" style="width:${v||0}%;background:${b.hex}"></div></div><div class="subv">${v!==null?v:'—'}</div>`;sl.appendChild(r);});
+  document.getElementById('rsn').innerHTML=`<p><strong>Why this matters:</strong> ${b.reason}</p>`;
+  document.getElementById('sp').classList.add('on');document.getElementById('ov').classList.add('on');
+}
+function closeSP(){document.getElementById('sp').classList.remove('on');document.getElementById('ov').classList.remove('on');}
+
+/* ── TABLE ── */
+function buildTabs(){
+  const r=document.getElementById('tabs');r.innerHTML='';
+  B.forEach((b,i)=>{const t=document.createElement('button');t.className='tab'+(i===at?' on':'');t.textContent=b.short;t.addEventListener('click',()=>{at=i;buildTabs();buildTable();});r.appendChild(t);});
+}
+function buildTable(){
+  const b=B[at];
+  document.getElementById('th').innerHTML=`<tr><th>Economy</th>${b.subs.map(s=>`<th>${s}</th>`).join('')}<th>Score</th></tr>`;
+  const tb=document.getElementById('tb');tb.innerHTML='';document.getElementById('ibar').classList.remove('on');
+  ALL.forEach(c=>{
+    const sc=gs(c,at),m=isM(c,at),ss=sv(sc,at);
+    const tr=document.createElement('tr');tr.className=c===cc?'hi':'';
+    tr.innerHTML=`<td><div class="cn">${CLABELS[c]}</div></td>${ss.map(v=>`<td><div class="dots">${mkD(v,b.hex)}</div></td>`).join('')}<td><div class="sv" style="color:${m?'#b0bec5':b.hex}">${m?'—':sc}</div></td>`;
+    tr.addEventListener('click',()=>{openP(b,sc,c);showInfo(b,sc,c);});
+    tr.addEventListener('mouseenter',()=>showInfo(b,sc,c));
+    tb.appendChild(tr);
+  });
+}
+function showInfo(b,sc,c){
+  const bar=document.getElementById('ibar');bar.classList.add('on');
+  const m=isM(c,at);
+  bar.innerHTML=m?`<strong>${CLABELS[c]}:</strong> Data not yet available for <em>${b.short}</em>.`:`<strong>${CLABELS[c]} · ${b.short}:</strong> Score of <strong>${sc}/100</strong>. ${b.reason}`;
+}
+function mkD(sc,color){
+  if(sc===null)return Array(5).fill(`<div class="d" style="background:var(--miss);opacity:.3"></div>`).join('');
+  const f=Math.round(sc/20);
+  return Array(5).fill(0).map((_,i)=>`<div class="d" style="background:${i<f?color:'#c5d8e8'};opacity:${i<f?.9:.2}"></div>`).join('');
+}
+
+/* ── SELECT COUNTRY ── */
+function selC(c){
+  cc=c;buildCList();
+  document.querySelectorAll('.clist-btn').forEach(b=>b.classList.toggle('on',b.textContent===CLABELS[c]));
+  document.getElementById('cname').textContent=CLABELS[c];
+  rAnim=false;drawR(c,true);buildTable();
+  if(window.spinTo&&CGEO[c])spinTo(CGEO[c].lon,CGEO[c].lat);
+  document.getElementById('mainContent').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── INIT ── */
+const obs=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting&&!rAnim){rAnim=true;drawR(cc,true);}});},{threshold:.15});
+window.addEventListener('DOMContentLoaded',()=>{
+  buildCList();buildTabs();buildTable();drawR(cc,false);
+  obs.observe(document.getElementById('rsvg'));
+  initGlobe();
+});
+</script>
+</body>
+</html>
