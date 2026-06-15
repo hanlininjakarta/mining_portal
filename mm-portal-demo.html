@@ -40,18 +40,79 @@
 
     /* ── DISCLAIMER ─────────────────────────────── */
     .page-disclaimer {
-      position: fixed;
-      left: 50%;
-      bottom: 16px;
-      transform: translateX(-50%);
-      width: max-content;
+      width: 100%;
       max-width: calc(100% - 2 * var(--margin));
+      margin: 0 auto;
+      padding: 24px 0 28px;
       text-align: center;
       font-size: 12px;
       line-height: 1.5;
       color: var(--primary70);
-      pointer-events: none;
-      z-index: 5;
+    }
+
+    /* ── WORLD BANK STANDARD FOOTER ─────────────── */
+    .wb-footer { background: var(--navy); color: rgba(255,255,255,0.72); margin-top: 8px; }
+    .wb-footer-main {
+      display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 32px; padding: 48px var(--margin) 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .wbf-brand-mark { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .wbf-globe { width: 34px; height: 34px; flex-shrink: 0; opacity: 0.92; }
+    .wbf-brand-name { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.3px; line-height: 1.2; }
+    .wbf-brand-sub  { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+    .wbf-subscribe { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.55; margin-bottom: 14px; }
+    .wbf-sub-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--nav); color: #fff; font-size: 13px; font-weight: 700;
+      padding: 9px 18px; border-radius: 22px; text-decoration: none; letter-spacing: 0.3px;
+      transition: background 0.15s;
+    }
+    .wbf-sub-btn:hover { background: #1b86d1; }
+    .wbf-sub-btn .material-symbols-outlined { font-size: 16px; }
+    .wbf-social { display: flex; gap: 12px; margin-top: 20px; }
+    .wbf-social a {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.75);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; text-decoration: none; transition: all 0.15s;
+    }
+    .wbf-social a:hover { background: #fff; color: var(--navy); border-color: #fff; }
+    .wbf-col-h {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+      color: #fff; margin-bottom: 14px;
+    }
+    .wbf-col a {
+      display: block; font-size: 13.5px; color: rgba(255,255,255,0.68);
+      text-decoration: none; padding: 5px 0; transition: color 0.15s;
+    }
+    .wbf-col a:hover { color: #fff; }
+    .wbf-affiliates {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 10px 22px;
+      padding: 20px var(--margin);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      font-size: 13px; font-weight: 600; letter-spacing: 0.4px; color: rgba(255,255,255,0.78);
+    }
+    .wbf-affiliates .lead { color: #fff; font-weight: 700; }
+    .wbf-affiliates span:not(.lead)::before { content: '·'; margin-right: 22px; color: rgba(255,255,255,0.35); }
+    .wbf-legal {
+      display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+      padding: 18px var(--margin) 10px; font-size: 12.5px;
+    }
+    .wbf-legal a { color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.15s; }
+    .wbf-legal a:hover { color: #fff; text-decoration: underline; }
+    .wbf-copy {
+      padding: 4px var(--margin) 22px; font-size: 12px; color: rgba(255,255,255,0.45);
+    }
+    .wbf-disclaimer {
+      padding: 14px var(--margin) 28px; font-size: 11.5px; line-height: 1.5;
+      color: rgba(255,255,255,0.4); border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    @media (max-width: 900px) {
+      .wb-footer-main { grid-template-columns: 1fr 1fr; gap: 28px; }
+    }
+    @media (max-width: 560px) {
+      .wb-footer-main { grid-template-columns: 1fr; }
     }
 
     /* ── BRAND BAR 68px ─────────────────────────── */
@@ -196,20 +257,20 @@
 
     /* ── VIEW 1: MAIN ───────────────────────────── */
     #view-main {
-      display: flex; flex-direction: column; height: calc(100vh - 111px);
+      display: flex; flex-direction: column; min-height: calc(100vh - 111px);
     }
     .main-body {
       flex: 1;
       display: flex; align-items: center; justify-content: center; gap: 72px;
-      padding: 0 var(--margin);
-      margin-top: -32px;
+      padding: 48px var(--margin) 56px;
     }
     .chart-wrap {
       width: 724px; flex-shrink: 1; min-width: 0;
       display: flex; justify-content: center;
       padding: 0;
     }
-    .chart-wrap svg { display: block; width: min(100%, calc(100vh - 270px)); height: auto; overflow: visible; }
+    /* Size by viewport height; breathing room is handled by main-body padding + min-height, so the chart can be large */
+    .chart-wrap svg { display: block; width: min(100%, calc(100vh - 300px), 720px); height: auto; overflow: visible; }
     .table-col  { width: 480px; flex-shrink: 0; min-width: 0; }
 
     /* Stack chart above table on smaller screens */
@@ -606,10 +667,6 @@
     <div class="logo-vdiv"></div>
     <span class="logo-name">M&amp;M Knowledge Platform</span>
   </div>
-  <a class="brand-trending" href="https://www.worldbank.org/en/topic/water/overview?intcid=ecr_hp_trendingdata_en_ext" target="_blank" rel="noopener">
-    <img src="img/download.svg" class="trending-icon" alt="">
-    <span class="trending-text">Trending Data: Two billion people lack safely managed drinking water services</span>
-  </a>
   <!--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"/>
 -->
 </div>
@@ -721,7 +778,6 @@
     </div>
     <div class="hdr-right">
       <div class="hdr-meta">10 bundles · 30 sub-indicators</div>
-      <div class="hdr-meta">score 0–100 · 2024</div>
     </div>
   </div>
 
@@ -749,7 +805,6 @@
 
   </div>
 
-  <div class="page-disclaimer">All data displayed on this page is fictional and is generated for demonstration purpose only. For internal use only. Please do not distribute.</div>
 </div><!-- /view-main -->
 
 
@@ -782,7 +837,6 @@
     </div>
     <div class="hdr-right">
       <div class="hdr-meta">10 bundles · 30 sub-indicators</div>
-      <div class="hdr-meta">score 0–100 · 2024</div>
     </div>
   </div>
 
@@ -809,23 +863,95 @@
 
   </div>
 
-  <div class="page-disclaimer">All data displayed on this page is fictional and is generated for demonstration purpose only. For internal use only. Please do not distribute.</div>
 </div><!-- /view-sub -->
+
+
+<!-- ═══════════════════════════════════════════
+     WORLD BANK STANDARD FOOTER (dashboard only)
+═══════════════════════════════════════════ -->
+<footer class="wb-footer hidden" id="wb-footer">
+  <div class="wb-footer-main">
+    <div class="wbf-brand">
+      <div class="wbf-brand-mark">
+        <svg class="wbf-globe" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="20" cy="20" r="18" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/>
+          <ellipse cx="20" cy="20" rx="8" ry="18" stroke="rgba(255,255,255,0.85)" stroke-width="1"/>
+          <line x1="2" y1="20" x2="38" y2="20" stroke="rgba(255,255,255,0.85)" stroke-width="1"/>
+          <line x1="20" y1="2" x2="20" y2="38" stroke="rgba(255,255,255,0.85)" stroke-width="1"/>
+        </svg>
+        <div>
+          <div class="wbf-brand-name">THE WORLD BANK</div>
+          <div class="wbf-brand-sub">IBRD · IDA &nbsp;|&nbsp; Metals &amp; Minerals Knowledge Platform</div>
+        </div>
+      </div>
+      <div class="wbf-subscribe">Stay current with our latest data &amp; insights.</div>
+      <a class="wbf-sub-btn" href="#" onclick="return false;">Subscribe <span class="material-symbols-outlined">arrow_forward</span></a>
+      <div class="wbf-social">
+        <a href="#" onclick="return false;" aria-label="Facebook">f</a>
+        <a href="#" onclick="return false;" aria-label="X">X</a>
+        <a href="#" onclick="return false;" aria-label="LinkedIn">in</a>
+        <a href="#" onclick="return false;" aria-label="YouTube">▶</a>
+      </div>
+    </div>
+
+    <div class="wbf-col">
+      <div class="wbf-col-h">Who We Are</div>
+      <a href="#" onclick="return false;">About</a>
+      <a href="#" onclick="return false;">News</a>
+      <a href="#" onclick="return false;">Careers</a>
+      <a href="#" onclick="return false;">Contact</a>
+    </div>
+
+    <div class="wbf-col">
+      <div class="wbf-col-h">Explore</div>
+      <a href="#" onclick="return false;">Countries</a>
+      <a href="#" onclick="return false;">Topics</a>
+      <a href="#" onclick="return false;">Projects &amp; Operations</a>
+      <a href="#" onclick="return false;">Research &amp; Publications</a>
+    </div>
+
+    <div class="wbf-col">
+      <div class="wbf-col-h">Resources</div>
+      <a href="#" onclick="return false;">Data</a>
+      <a href="#" onclick="return false;">Events</a>
+      <a href="#" onclick="return false;">Knowledge Academy</a>
+      <a href="#" onclick="return false;">Methodology</a>
+    </div>
+  </div>
+
+  <div class="wbf-affiliates">
+    <span class="lead">The World Bank Group</span>
+    <span>IBRD</span><span>IDA</span><span>IFC</span><span>MIGA</span><span>ICSID</span>
+  </div>
+
+  <div class="wbf-legal">
+    <a href="#" onclick="return false;">Legal</a>
+    <a href="#" onclick="return false;">Privacy Notice</a>
+    <a href="#" onclick="return false;">Site Accessibility</a>
+    <a href="#" onclick="return false;">Access to Information</a>
+    <a href="#" onclick="return false;">Scam Alert</a>
+    <a href="#" onclick="return false;">File a Complaint</a>
+  </div>
+
+  <div class="wbf-copy">© 2026 The World Bank Group, All Rights Reserved.</div>
+
+  <div class="wbf-disclaimer">All data displayed on this site is fictional and is generated for demonstration purposes only. For internal use only — please do not distribute.</div>
+</footer>
 
 
 <script>
 // ── BUNDLE LABEL LINES ────────────────────────────
 const LABEL_LINES = {
-  1:['Political Stability','& Governance'],
-  2:['Geological Info','& Resource Tenure'],
-  3:['Mining Regulatory','Framework'],
-  4:['Institutional','Capacity'],
-  5:['Operational','Efficiency'],
+  1:['Political Stability','and Governance'],
+  2:['Geological Information','and Cadaster'],
+  3:['Mining Regulation','Framework'],
+  4:['Mining Institutions','Capacity'],
+  5:['Mining Institutions','Efficiency'],
   6:['Mining ESG','Standards'],
-  7:['Transport &','Logistics'],
-  8:['Infrastructure','& Utilities'],
+  7:['Transport and','Logistics'],
+  8:['Utilities &','Infrastructure'],
   9:['Business Entry','& Market Access'],
-  10:['Mining Labor','& Skills'],
+  10:['Mining Labor','and Skills'],
 };
 
 // ── BUNDLE ICONS (Material Symbols names) ─────────
@@ -848,17 +974,19 @@ function bundleIconSvg(id){
 
 
 // ── BUNDLE DEFINITIONS (static — names, ids, interactive flag) ────
+// Display order set by the array sequence below; each pillar keeps its id, so its
+// sub-indicators, scores, colour and icon (all keyed by id) travel with it on reorder.
 const BUNDLE_DEFS = [
-  { id:1,  name:'Political Stability & Governance Quality',     color:'#e91e63', active:true, reason:'Political and governance risk directly affects the cost of capital and project insurability.' },
-  { id:2,  name:'Geological Information & Resource Tenure',     color:'#1a73e8', active:true, reason:'Reliable geological data and clear tenure let investors assess deposit viability and de-risk exploration.' },
-  { id:3,  name:'Mining Regulatory Framework',                 color:'#7b1fa2', active:true, reason:'A clear, stable regulatory and fiscal framework is essential for long-term project bankability.' },
-  { id:4,  name:'Institutional Capacity & Public Administration', color:'#f57c00', active:true, reason:'Strong institutions reduce the delays and discretion that add cost and risk to mine development.' },
-  { id:5,  name:'Operational Efficiency & Service Quality',     color:'#0097a7', active:true, reason:'Efficient, transparent administration lowers transaction costs and builds investor confidence.' },
-  { id:6,  name:'Mining ESG Standards & Practices',            color:'#2e7d32', active:true, reason:'ESG performance is a prerequisite for international project finance and a social licence to operate.' },
-  { id:7,  name:'Transport & Logistics',                       color:'#00897b', active:true, reason:'Logistics gaps can render viable deposits uneconomic and erode export competitiveness.' },
-  { id:8,  name:'Infrastructure & Utilities',                  color:'#5e35b1', active:true, reason:'Mining is utility-intensive; unreliable power, water or connectivity undermines operating margins.' },
-  { id:9,  name:'Business Entry & Market Access',              color:'#c62828', active:true, reason:'Market-entry conditions determine commercial viability and the attractiveness of off-take.' },
-  { id:10, name:'Mining Labor & Skills Development',           color:'#6d4c41', active:true, reason:'Skilled-labour shortages raise costs, while labour and safety standards shape community relations.' },
+  { id:1,  name:'Political Stability and Governance',          color:'#e91e63', active:true, reason:'Political and governance risk directly affects the cost of capital and project insurability.' },
+  { id:2,  name:'Geological Information and Cadaster',         color:'#1a73e8', active:true, reason:'Reliable geological data and clear tenure let investors assess deposit viability and de-risk exploration.' },
+  { id:3,  name:'Mining Regulation Framework',                color:'#7b1fa2', active:true, reason:'A clear, stable regulatory and fiscal framework is essential for long-term project bankability.' },
+  { id:4,  name:'Mining Institutions Capacity',               color:'#f57c00', active:true, reason:'Strong institutions reduce the delays and discretion that add cost and risk to mine development.' },
+  { id:5,  name:'Mining Institutions Efficiency',             color:'#0097a7', active:true, reason:'Efficient, transparent administration lowers transaction costs and builds investor confidence.' },
+  { id:6,  name:'Mining ESG Standards & Practices',           color:'#2e7d32', active:true, reason:'ESG performance is a prerequisite for international project finance and a social licence to operate.' },
+  { id:10, name:'Mining Labor and Skills',                    color:'#6d4c41', active:true, reason:'Skilled-labour shortages raise costs, while labour and safety standards shape community relations.' },
+  { id:8,  name:'Utilities, Infrastructure and Services',     color:'#5e35b1', active:true, reason:'Mining is utility-intensive; unreliable power, water or connectivity undermines operating margins.' },
+  { id:7,  name:'Transport and Logistics',                    color:'#00897b', active:true, reason:'Logistics gaps can render viable deposits uneconomic and erode export competitiveness.' },
+  { id:9,  name:'Business Entry and Market Access',           color:'#c62828', active:true, reason:'Market-entry conditions determine commercial viability and the attractiveness of off-take.' },
 ];
 
 // Sub-indicator names are framework-level (same across countries)
@@ -1144,13 +1272,13 @@ function buildChart(){
     petalWrap.appendChild(grp);
 
     // Text label — collected for post-loop append so they sit above petal wrap
-    const labelR = maxR + 20;
+    const labelR = maxR + 24;
     const lx = cx + labelR * Math.cos(midA);
     const ly = cy + labelR * Math.sin(midA);
     const cm = Math.cos(midA);
     const anchor = Math.abs(cm) < 0.28 ? 'middle' : cm > 0 ? 'start' : 'end';
     const lines = LABEL_LINES[bundle.id] || [bundle.name];
-    const lh = 18, fs = 16;
+    const lh = 21, fs = 18;
     const yBase = ly - (lines.length - 1) * lh / 2;
 
     const bg = el('g',{style:'cursor:default'});
@@ -1375,6 +1503,8 @@ function showView(v){
   document.querySelector('.navbar').classList.toggle('hidden', v==='portal');
   // Theme-coloured divider under the header only on the landing page.
   document.body.classList.toggle('on-portal', v==='portal');
+  // World Bank footer appears on the data repository pages, not the landing.
+  document.getElementById('wb-footer').classList.toggle('hidden', v==='portal');
   document.getElementById('nav-overview').classList.toggle('active',v==='main');
   try { localStorage.setItem('mm-view', v); } catch(e){}
   window.scrollTo({top:0});
