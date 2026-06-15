@@ -261,17 +261,17 @@
     }
     .main-body {
       flex: 1;
-      display: flex; align-items: center; justify-content: center; gap: 72px;
-      padding: 48px var(--margin) 56px;
+      display: flex; align-items: center; justify-content: center; gap: 40px;
+      padding: 40px max(48px, calc(var(--margin) - 70px)) 52px;
     }
     .chart-wrap {
-      width: 724px; flex-shrink: 1; min-width: 0;
+      width: 860px; flex-shrink: 1; min-width: 0;
       display: flex; justify-content: center;
       padding: 0;
     }
     /* Size by viewport height; breathing room is handled by main-body padding + min-height, so the chart can be large */
-    .chart-wrap svg { display: block; width: min(100%, calc(100vh - 300px), 720px); height: auto; overflow: visible; }
-    .table-col  { width: 480px; flex-shrink: 0; min-width: 0; }
+    .chart-wrap svg { display: block; width: min(100%, calc(100vh - 250px), 820px); height: auto; overflow: visible; }
+    .table-col  { width: 400px; flex-shrink: 0; min-width: 0; }
 
     /* Stack chart above table on smaller screens */
     @media (max-width: 1100px) {
