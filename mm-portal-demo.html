@@ -702,14 +702,14 @@
   <section class="portal-cards">
 
     <div class="pcard active" onclick="enterDashboard()" tabindex="0" role="button"
-         aria-label="Open RISE Global Data Repository"
+         aria-label="Open Global Data Repository"
          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();enterDashboard();}">
       <div class="pcard-top">
         <div class="pcard-icon"><span class="material-symbols-outlined">database</span></div>
         <span class="pcard-badge live">● Live demo</span>
       </div>
       <div class="pcard-num">Component 01</div>
-      <div class="pcard-title">RISE Global Data Repository</div>
+      <div class="pcard-title">Global Data Repository</div>
       <div class="pcard-desc">Country-level Mining Sector Diagnostic scoring across 10 bundles and 30 sub-indicators, with interactive radial profiles.</div>
       <div class="pcard-cta">Explore the portal <span class="material-symbols-outlined">arrow_forward</span></div>
     </div>
@@ -749,7 +749,7 @@
 
   <div class="page-header">
     <div>
-      <div class="hdr-section"><span class="breadcrumb-link" onclick="showView('portal')">Metals &amp; Minerals Knowledge Platform</span> › <span class="breadcrumb-link" onclick="showView('portal')">RISE Global Data Repository</span></div>
+      <div class="hdr-section"><span class="breadcrumb-link" onclick="showView('portal')">Metals &amp; Minerals Knowledge Platform</span> › <span class="breadcrumb-link" onclick="showView('portal')">Global Data Repository</span></div>
       <div class="hdr-title-row">
         <button class="hdr-back" onclick="showView('portal')" aria-label="Back to Knowledge Platform" title="Back to Knowledge Platform">
           <span class="material-symbols-outlined">arrow_back</span>
@@ -815,7 +815,7 @@
 
   <div class="page-header">
     <div>
-      <div class="hdr-section"><span class="breadcrumb-link" onclick="showView('portal')">RISE Global Data Repository</span> › <span class="breadcrumb-link" onclick="showView('main')">Metals &amp; Minerals Investment Readiness Dashboard</span> › <span id="sub-crumb">sub-indicators</span></div>
+      <div class="hdr-section"><span class="breadcrumb-link" onclick="showView('portal')">Global Data Repository</span> › <span class="breadcrumb-link" onclick="showView('main')">Metals &amp; Minerals Investment Readiness Dashboard</span> › <span id="sub-crumb">sub-indicators</span></div>
       <div class="hdr-title-row">
         <button class="hdr-back" onclick="showView('main')" aria-label="Back to portal overview" title="Back to portal overview">
           <span class="material-symbols-outlined">arrow_back</span>
@@ -1517,7 +1517,7 @@ function showView(v){
   if(v==='portal' && window._portalGlobeUpdate) window._portalGlobeUpdate();
 }
 
-// Enter the RISE Global Data Repository (dashboard). Optional country pre-selects it.
+// Enter the Global Data Repository (dashboard). Optional country pre-selects it.
 function enterDashboard(country){
   if(country && COUNTRY_DATA[country]) selectCountry(country);
   showView('main');
