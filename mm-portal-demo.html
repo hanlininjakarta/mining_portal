@@ -794,9 +794,9 @@
         <div></div>
         <div class="btable-col">Bundles</div>
         <div class="btable-col right">
-          <span class="col-info-wrap">Rating
+          <span class="col-info-wrap">Assessment
             <span class="material-symbols-outlined col-info-icon" tabindex="0">info</span>
-            <span class="col-info-tip">Performance shown as 1–5 dots (one dot per 20 points, rounded up). Higher is stronger.</span>
+            <span class="col-info-tip">Assessment shown as Weak, Limited, Moderate, Good, Excellent.</span>
           </span>
         </div>
       </div>
@@ -1344,6 +1344,19 @@ function buildTable(){
       <div class="btable-name">${b.name}</div>
       <div class="btable-score"><span class="card-dots" style="justify-content:flex-end">${bundleDots(b.color,b.score)}</span></div>
     `;
+    // Hover the assessment scale (dots) to reveal the level.
+    const dspan=row.querySelector('.card-dots');
+    if(dspan){
+      dspan.addEventListener('mouseenter', e=>{
+        const t=document.getElementById('tooltip');
+        t.querySelector('.tt-name').textContent=b.name;
+        t.querySelector('.tt-score').textContent='';
+        t.querySelector('.tt-band').textContent=bundleLevel(b.score);
+        t.style.display='block'; moveTip(e);
+      });
+      dspan.addEventListener('mousemove', e=>moveTip(e));
+      dspan.addEventListener('mouseleave', hideTip);
+    }
     if(b.active){
       row.addEventListener('mouseenter', ()=>{ row.style.background=bundleBg(b.color,0.08); });
       row.addEventListener('mouseleave', ()=>{ row.style.background=''; });
@@ -1424,6 +1437,13 @@ function bundleDots(color, score){
     }
   }
   return h;
+}
+
+// Level name matching the bundle dots (ceil(score/20) -> Weak … Excellent).
+function bundleLevel(score){
+  const n = score<=0 ? 0 : Math.min(5, Math.ceil(score/20));
+  const bd = BAND5.find(x=>x.dots===n);
+  return bd ? bd.label : 'No data';
 }
 
 function renderSub(){
