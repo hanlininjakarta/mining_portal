@@ -1197,7 +1197,12 @@ function buildChart(){
   svg.appendChild(el('rect',{x:-90,y:-90,width:820,height:820,fill:'#fff'}));
   svg.appendChild(el('circle',{cx,cy,r:maxR,fill:'#fff'}));
 
-  // Score-scale grid rings (50 / 100) hidden — no numeric scale shown on the petal chart.
+  // Grid rings — inner (50) and outer (100) to indicate scale
+  [0.5,1].forEach(f=>{
+    const r=innerR+(maxR-innerR)*f;
+    svg.appendChild(el('circle',{cx,cy,r,fill:'none',stroke:'#CCE0F2',
+      'stroke-width':1,'stroke-dasharray':f<1?'4 4':'none'}));
+  });
 
   const allBundles = getAllBundles();
   const n = allBundles.length;
@@ -1296,20 +1301,7 @@ function buildChart(){
   svg.appendChild(petalWrap);
   labelGroups.forEach(bg => svg.appendChild(bg));
 
-  // Scale markers just left of the top vertical axis: 50 (inner ring), 100 (outer ring).
-  // SVG font-size is in the 820-unit coordinate space (shown at <100%), so compute the
-  // unit value that renders ~12px on screen at the current chart width.
-  // Insert these BEFORE the bars (petalWrap) so a bar that overlaps a label paints over it.
-  const fs12 = Math.round(12 * 820 / (svg.getBoundingClientRect().width || 538));
-  [{f:0.5,v:'50'},{f:1,v:'100'}].forEach(({f,v})=>{
-    const r=innerR+(maxR-innerR)*f;
-    const t=el('text',{x:cx-6, y:cy-r-16, 'text-anchor':'end','dominant-baseline':'central',
-      fill:'#AAB3BC','font-size':fs12,'font-weight':600,
-      stroke:'#fff','stroke-width':3,'paint-order':'stroke','stroke-linejoin':'round',
-      'font-family':"'Open Sans',sans-serif"});
-    t.textContent=v;
-    svg.insertBefore(t, petalWrap);
-  });
+  // Scale number labels (50 / 100) removed — grid rings are kept, but no numeric scale is shown.
 
   animateChart();
 }
