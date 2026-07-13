@@ -794,9 +794,9 @@
         <div></div>
         <div class="btable-col">Bundles</div>
         <div class="btable-col right">
-          <span class="col-info-wrap">Score
+          <span class="col-info-wrap">Rating
             <span class="material-symbols-outlined col-info-icon" tabindex="0">info</span>
-            <span class="col-info-tip">Average of sub-indicator scores for this bundle (0–100)</span>
+            <span class="col-info-tip">Performance shown as 1–5 dots (one dot per 20 points, rounded up). Higher is stronger.</span>
           </span>
         </div>
       </div>
@@ -1355,7 +1355,7 @@ function buildTable(){
     row.innerHTML=`
       <div class="btable-dot" style="background:${b.color}"></div>
       <div class="btable-name">${b.name}</div>
-      <div class="btable-score">${b.score}</div>
+      <div class="btable-score"><span class="card-dots" style="justify-content:flex-end">${bundleDots(b.color,b.score)}</span></div>
     `;
     if(b.active){
       row.addEventListener('mouseenter', ()=>{ row.style.background=bundleBg(b.color,0.08); });
@@ -1410,6 +1410,22 @@ function buildBlist(){
 
 function dots(color, score){
   const n=b5(score).dots;
+  const opacities=[0.2,0.4,0.6,0.82,1.0];
+  let h='';
+  for(let i=0;i<5;i++){
+    if(i<n){
+      const bg=bundleBg(color,opacities[i]);
+      h+=`<div class="cdot on" style="background:${bg};border-color:${bg}"></div>`;
+    } else {
+      h+=`<div class="cdot"></div>`;
+    }
+  }
+  return h;
+}
+
+// Bundle-level pips: one dot per 20 points, rounded UP (19–20 => 1, 21 => 2, ...). No numeric score shown.
+function bundleDots(color, score){
+  const n = score<=0 ? 0 : Math.min(5, Math.ceil(score/20));
   const opacities=[0.2,0.4,0.6,0.82,1.0];
   let h='';
   for(let i=0;i<5;i++){
@@ -1533,8 +1549,8 @@ function showTip(e,b){
   const t=document.getElementById('tooltip');
   const band=b4(b.score);
   t.querySelector('.tt-name').textContent=b.name;
-  t.querySelector('.tt-score').textContent=b.score+' / 100';
-  t.querySelector('.tt-band').textContent=band.label+' ('+band.min+'–'+band.max+')';
+  t.querySelector('.tt-score').textContent='';
+  t.querySelector('.tt-band').textContent=band.label;
   t.style.display='block'; moveTip(e);
 }
 function moveTip(e){
